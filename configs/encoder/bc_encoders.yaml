@@ -1,0 +1,22 @@
+image_encoder:
+  # _target_: tactile_learning.models.pretrained.resnet18
+  # pretrained: true
+  # out_dim: 512
+  _target_: model.encoder.ImageBCEncoder
+  out_dim: 512
+  in_channels: 3
+
+# tactile_encoder:
+#   # _target_: tactile_learning.models.pretrained.alexnet
+#   # pretrained: true
+#   # out_dim: 1024 # this is only for training usage
+#   # remove_last_layer: true
+#   _target_: tactile_learning.models.TactileBCEncoder
+#   in_channels: 3
+#   out_dim: 64
+
+last_layer:
+  _target_: model.utils.create_fc 
+  input_dim: 576 # 64 + 512 1536 # 1024 + 512
+  output_dim: 23 # 16 + 7
+  hidden_dims: [256, 64] # [512, 128, 64]

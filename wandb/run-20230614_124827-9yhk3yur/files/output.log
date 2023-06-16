@@ -1,0 +1,10 @@
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 98, in main
+    workspace.train()
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 57, in train
+    train_loss = learner.train_epoch(train_loader)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/learner/temporal_ssl.py", line 69, in train_epoch
+    curr_img, next_img, joint_diff = [b.to(self.device) for b in batch]
+ValueError: too many values to unpack (expected 3)
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

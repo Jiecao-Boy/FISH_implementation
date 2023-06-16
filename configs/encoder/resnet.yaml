@@ -1,0 +1,3 @@
+_target_: model.pretrained.resnet18
+pretrained: true
+out_dim: 512

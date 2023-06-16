@@ -1,0 +1,21 @@
+deployer:
+  _target_: deployer.vinn.VINN
+  data_path: /scratch/yd2032/Desktop/holobot_data
+  deployment_dump_dir: /scratch/yd2032/Desktop/byol_implementation/deploy
+  image_out_dir: /scratch/yd2032/Desktop/byol_implementation/2023.06.01/18-47_image_byol_bs_32_epochs_500_lr_1e-05_cube_flipping
+  nn_buffer_size: 20
+  nn_k: 20
+  representation_types:
+  - image
+  - torque
+  representation_importance:
+  - 1
+  - 1
+  demos_to_use: []
+  view_num: 1
+  open_loop: false
+  representation_path: /scratch/yd2032/Desktop/byol_implementation/representation/2023.06.06/22-01_representation/representation.npy
+visualize: true
+loop: true
+frequency: 15
+data_path: /scratch/yd2032/Desktop/holobot_data/cube_flipping

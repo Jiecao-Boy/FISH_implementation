@@ -1,0 +1,7 @@
+defaults:
+  - deployer: vinn
+
+visualize: true
+loop: true
+frequency: 15
+data_path: /scratch/yd2032/Desktop/holobot_data/cube_flipping # User should fill this

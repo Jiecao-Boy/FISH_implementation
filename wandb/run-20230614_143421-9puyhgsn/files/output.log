@@ -1,0 +1,32 @@
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 98, in main
+    workspace.train()
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 57, in train
+    train_loss = learner.train_epoch(train_loader)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/learner/temporal_ssl.py", line 67, in train_epoch
+    for batch in train_loader:
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 634, in __next__
+    data = self._next_data()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1346, in _next_data
+    return self._process_data(data)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1372, in _process_data
+    data.reraise()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/_utils.py", line 644, in reraise
+    raise exception
+TypeError: Caught TypeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/_utils/worker.py", line 308, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataset.py", line 298, in __getitem__
+    return self.dataset[self.indices[idx]]
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/datasets/dataset.py", line 251, in __getitem__
+    joint_diff = self._get_joint_diff(index)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/datasets/dataset.py", line 207, in _get_joint_diff
+    curr_joint_state = self._get_joint_state(index)
+TypeError: _get_joint_state() missing 1 required positional argument: 'kinova'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

@@ -1,0 +1,128 @@
+wandb_version: 1
+
+encoder:
+  desc: null
+  value:
+    encoder:
+      _target_: model.pretrained.resnet18
+      pretrained: true
+      out_dim: 512
+    linear_layer:
+      _target_: model.utils.create_fc
+      input_dim: 1024
+      output_dim: 23
+      hidden_dims:
+      - 256
+      - 64
+learner:
+  desc: null
+  value:
+    repr_loss_fn: infonce
+    joint_diff_loss_fn: mse
+    joint_diff_scale_factor: 100
+    total_loss_type: contrastive
+dataset:
+  desc: null
+  value:
+    _target_: datasets.dataset.TemporalVisionJointDiffDataset
+    data_path: ???
+    vision_view_num: 0
+    vision_img_size: 224
+    frame_diff: 5
+optimizer:
+  desc: null
+  value:
+    _target_: torch.optim.Adam
+    params: ???
+    lr: 1.0e-05
+    weight_decay: 1.0e-05
+seed:
+  desc: null
+  value: 42
+device:
+  desc: null
+  value: cuda
+learner_type:
+  desc: null
+  value: temporal_ssl
+self_supervised:
+  desc: null
+  value: true
+batch_size:
+  desc: null
+  value: 32
+vision_image_size:
+  desc: null
+  value: 224
+train_epochs:
+  desc: null
+  value: 500
+save_frequency:
+  desc: null
+  value: 10
+train_dset_split:
+  desc: null
+  value: 0.95
+distributed:
+  desc: null
+  value: false
+num_workers:
+  desc: null
+  value: 2
+world_size:
+  desc: null
+  value: 1
+num_gpus:
+  desc: null
+  value: 4
+object:
+  desc: null
+  value: cube_flipping
+experiment:
+  desc: null
+  value: temporal_ssl_bs_32_epochs_500_lr_1e-05_cube_flipping
+data_dir:
+  desc: null
+  value: /scratch/yd2032/Desktop/holobot_data/cube_flipping
+checkpoint_dir:
+  desc: null
+  value: /scratch/yd2032/Desktop/fish_implementation/2023.06.14/14-34_temporal_ssl_bs_32_epochs_500_lr_1e-05_cube_flipping/saved_models
+logger:
+  desc: null
+  value: true
+log_frequency:
+  desc: null
+  value: 1
+vision_view_num:
+  desc: null
+  value: 0
+_wandb:
+  desc: null
+  value:
+    python_version: 3.9.16
+    cli_version: 0.15.3
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1686767661.357399
+    t:
+      1:
+      - 1
+      - 41
+      - 50
+      - 51
+      - 55
+      2:
+      - 1
+      - 41
+      - 50
+      - 51
+      - 55
+      3:
+      - 13
+      - 16
+      - 23
+      4: 3.9.16
+      5: 0.15.3
+      8:
+      - 8

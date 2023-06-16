@@ -1,0 +1,8 @@
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 98, in main
+    workspace.train()
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 57, in train
+    train_loss = learner.train_epoch(train_loader)
+AttributeError: 'NoneType' object has no attribute 'train_epoch'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

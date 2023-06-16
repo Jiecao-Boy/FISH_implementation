@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 101, in <module>
+    main()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 98, in main
+    workspace.train()
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 57, in train
+    train_loss = learner.train_epoch(train_loader)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/learner/temporal_ssl.py", line 67, in train_epoch
+    for batch in train_loader:
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 634, in __next__
+    data = self._next_data()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1329, in _next_data
+    idx, data = self._get_data()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1295, in _get_data
+    success, data = self._try_get_data()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1133, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/multiprocessing/queues.py", line 113, in get
+    if not self._poll(timeout):
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/multiprocessing/connection.py", line 257, in poll
+    return self._poll(timeout)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/multiprocessing/connection.py", line 424, in _poll
+    r = wait([self], timeout)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/multiprocessing/connection.py", line 931, in wait
+    ready = selector.select(timeout)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt

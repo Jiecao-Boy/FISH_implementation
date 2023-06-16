@@ -1,0 +1,14 @@
+data_path: /scratch/yd2032/Desktop/holobot_data/cube_flipping
+
+# Directories to change by the user depending on where they saved the data
+# deployment_dump_dir: /scratch/yd2032/Desktop/byol_implementation/deploy
+# tactile_out_dir: /scratch/yd2032/Desktop/byol_implementation/deploy
+data_out_dir: /scratch/yd2032/Desktop/byol_implementation/2023.06.01/18-47_image_byol_bs_32_epochs_500_lr_1e-05_cube_flipping
+
+
+representation_types: ['image', 'torque'] # Observations used in the representations
+# representation_importance: [1,1] # We will multiply the distances with these given numbers when using in scaled nearest neighbors
+demos_to_use: [] # Leave empty to use all the demos in the evaluation
+# view_num: 1
+# open_loop: false
+save_path: /scratch/yd2032/Desktop/byol_implementation/representation/${now:%Y.%m.%d}/${now:%H-%M}_representation

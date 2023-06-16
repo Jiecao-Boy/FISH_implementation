@@ -1,0 +1,7 @@
+data_path: /scratch/yd2032/Desktop/holobot_data/cube_flipping
+data_out_dir: /scratch/yd2032/Desktop/byol_implementation/2023.06.01/18-47_image_byol_bs_32_epochs_500_lr_1e-05_cube_flipping
+representation_types:
+- image
+- torque
+demos_to_use: []
+save_path: /scratch/yd2032/Desktop/byol_implementation/representation/2023.06.07/18-46_representation/representation.npy

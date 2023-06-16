@@ -1,0 +1,38 @@
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 98, in main
+    workspace.train()
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/train_nondis.py", line 57, in train
+    train_loss = learner.train_epoch(train_loader)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/learner/temporal_ssl.py", line 67, in train_epoch
+    for batch in train_loader:
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 634, in __next__
+    data = self._next_data()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1346, in _next_data
+    return self._process_data(data)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1372, in _process_data
+    data.reraise()
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/_utils.py", line 644, in reraise
+    raise exception
+TypeError: Caught TypeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/_utils/worker.py", line 308, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torch/utils/data/dataset.py", line 298, in __getitem__
+    return self.dataset[self.indices[idx]]
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/datasets/dataset.py", line 247, in __getitem__
+    curr_image = self._get_image(index)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/datasets/dataset.py", line 224, in _get_image
+    img = self.vision_transform(loader(image_path))
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torchvision/transforms/transforms.py", line 95, in __call__
+    img = t(img)
+  File "/ext3/miniconda3/envs/tactile_dexterity/lib/python3.9/site-packages/torchvision/transforms/transforms.py", line 486, in __call__
+    return self.lambd(img)
+  File "/scratch/yd2032/Desktop/fish_implementation/FISH/datasets/dataset.py", line 181, in _crop_transform
+    return crop_transform(image, camera_view=self.view_num, image_size=self.img_size)
+TypeError: crop_transform() got an unexpected keyword argument 'image_size'
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
