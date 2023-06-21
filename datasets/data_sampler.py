@@ -9,15 +9,17 @@ from utils.data import *
 
 from holobot.samplers.allegro import AllegroSampler 
 
-def data_sampler(data_path, view_num):
+def data_sampler(data_path, view_num, demo_lst):
     roots = sorted(glob.glob(f'{data_path}/demonstration_*'))
     print("Sampling data...")
-    ##sampled data: [demo_id, img_id, joint_state_id]
+    ## NOTE: sampled data: [demo_id, img_id, joint_state_id] (may need change to joint_commanded_state during deployment)
     demo_img_joint = []
     for demo_id, root in enumerate(roots):
         ## This is just temporal!! for the cube_flipping task
-        if demo_id in [0, 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19]:
-            continue
+        # if demo_id in [0, 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19]:
+        #     continue
+        if not demo_id in demo_lst: 
+            continue  
 
         print("demo id:{}".format(demo_id))
         sampler = AllegroSampler(root, [view_num], 'rgb', 0.01)

@@ -78,43 +78,43 @@ class RGBArrayAsObservationWrapper(dm_env.Environment):
 
 ## NOTE: need to change this
 # It should receive the tactile embeddings and add that as a spec to the observations
-class TactileReprAsObservationWrapper(dm_env.Environment):
-	def __init__(self, env, tactile_embedding_dim=1024):
-		self._env = env 
-		self._tactile_size = tactile_embedding_dim
+# class TactileReprAsObservationWrapper(dm_env.Environment):
+# 	def __init__(self, env, tactile_embedding_dim=1024):
+# 		self._env = env 
+# 		self._tactile_size = tactile_embedding_dim
 
-		self._env.reset()
+# 		self._env.reset()
 
-		# Add the tactile obs_spec
-		self._obs_spec = self._env.observation_spec()
-		self._obs_spec['tactile'] = specs.Array(
-			shape = (self._tactile_size,),
-			dtype = np.float32, # NOTE: is this a problem?
-			name = 'tactile' # We will receive the representation directly
-		)
+# 		# Add the tactile obs_spec
+# 		self._obs_spec = self._env.observation_spec()
+# 		self._obs_spec['tactile'] = specs.Array(
+# 			shape = (self._tactile_size,),
+# 			dtype = np.float32, # NOTE: is this a problem?
+# 			name = 'tactile' # We will receive the representation directly
+# 		)
 
-	def reset(self, **kwargs):
-		obs = {}
-		obs = self._env.reset(**kwargs)
-		obs['tactile'] = obs['tactile'].astype(np.float32) # NOTE: you might need to change this after you implement the environment
-		return obs
+# 	def reset(self, **kwargs):
+# 		obs = {}
+# 		obs = self._env.reset(**kwargs)
+# 		obs['tactile'] = obs['tactile'].astype(np.float32) # NOTE: you might need to change this after you implement the environment
+# 		return obs
 
-	def step(self, action):
-		obs, reward, done, info = self._env.step(action)
-		obs['tactile'] = obs['tactile'].astype(np.float32)	
-		return obs, reward, done, info
+# 	def step(self, action):
+# 		obs, reward, done, info = self._env.step(action)
+# 		obs['tactile'] = obs['tactile'].astype(np.float32)	
+# 		return obs, reward, done, info
 
-	def observation_spec(self):
-		return self._obs_spec
+# 	def observation_spec(self):
+# 		return self._obs_spec
 
-	def action_spec(self):
-		return self._env.action_spec()
+# 	def action_spec(self):
+# 		return self._env.action_spec()
 
-	def render(self, mode="rgb_array", width=256, height=256): # NOTE: We could choose to render tactile as well 
-		return self._env.render(mode="rgb_array", width=width, height=height)
+# 	def render(self, mode="rgb_array", width=256, height=256): # NOTE: We could choose to render tactile as well 
+# 		return self._env.render(mode="rgb_array", width=width, height=height)
 
-	def __getattr__(self, name):
-		return getattr(self._env, name)
+# 	def __getattr__(self, name):
+# 		return getattr(self._env, name)
 
 class RobotFeaturesAsObservationWrapper(dm_env.Environment):
 	def __init__(self, env, feature_dim=23):
@@ -208,7 +208,7 @@ class FrameStackWrapper(dm_env.Environment):
 		self._env = env
 		self._num_frames = num_frames
 		self._frames = deque([], maxlen=num_frames)
-		self._tactile_frames = deque([], maxlen=num_frames)
+		# self._tactile_frames = deque([], maxlen=num_frames)
 		self._features_frames = deque([], maxlen=num_frames)
 
 		wrapped_obs_spec = env.observation_spec()
@@ -224,12 +224,12 @@ class FrameStackWrapper(dm_env.Environment):
 											maximum=255,
 											name='pixels')
 		
-		tactile_shape = wrapped_obs_spec['tactile'].shape
-		self._obs_spec['tactile'] = specs.Array(
-			shape = (num_frames * tactile_shape[0],),
-			dtype = np.float32, 
-			name = 'tactile'
-		)
+		# tactile_shape = wrapped_obs_spec['tactile'].shape
+		# self._obs_spec['tactile'] = specs.Array(
+		# 	shape = (num_frames * tactile_shape[0],),
+		# 	dtype = np.float32, 
+		# 	name = 'tactile'
+		# )
 		features_shape = wrapped_obs_spec['features'].shape
 		self._obs_spec['features'] = specs.Array(
 			shape = (num_frames * features_shape[0],),
@@ -239,11 +239,11 @@ class FrameStackWrapper(dm_env.Environment):
 
 	def _transform_observation(self, time_step):
 		assert len(self._frames) == self._num_frames
-		assert len(self._tactile_frames) == self._num_frames
+		# assert len(self._tactile_frames) == self._num_frames
 		assert len(self._features_frames) == self._num_frames
 		obs = {}
 		obs['pixels'] = np.concatenate(list(self._frames), axis=0)
-		obs['tactile'] = np.concatenate(list(self._tactile_frames), axis=0)
+		# obs['tactile'] = np.concatenate(list(self._tactile_frames), axis=0)
 		obs['features'] = np.concatenate(list(self._features_frames), axis=0)
 		obs['goal_achieved'] = time_step.observation['goal_achieved']
 		return time_step._replace(observation=obs)
@@ -255,18 +255,18 @@ class FrameStackWrapper(dm_env.Environment):
 			pixels = pixels[0]
 		return pixels.transpose(2, 0, 1).copy()
 	
-	def _extract_tactile_repr(self, time_step):
-		tactile_repr = time_step.observation['tactile']
-		return tactile_repr # Add a new dimension as the `batch` for frame stacking
+	# def _extract_tactile_repr(self, time_step):
+	# 	tactile_repr = time_step.observation['tactile']
+	# 	return tactile_repr # Add a new dimension as the `batch` for frame stacking
 
 	def reset(self):
 		time_step = self._env.reset()
 		pixels = self._extract_pixels(time_step)
-		tactiles = self._extract_tactile_repr(time_step)
+		# tactiles = self._extract_tactile_repr(time_step)
 		features = time_step.observation['features']
 		for _ in range(self._num_frames):
 			self._frames.append(pixels)
-			self._tactile_frames.append(tactiles)
+			# self._tactile_frames.append(tactiles)
 			self._features_frames.append(features)
 
 		return self._transform_observation(time_step)
@@ -274,10 +274,10 @@ class FrameStackWrapper(dm_env.Environment):
 	def step(self, action):
 		time_step = self._env.step(action)
 		pixels = self._extract_pixels(time_step)
-		tactiles = self._extract_tactile_repr(time_step)
+		# tactiles = self._extract_tactile_repr(time_step)
 		features = time_step.observation['features']
 		self._frames.append(pixels)
-		self._tactile_frames.append(tactiles)
+		# self._tactile_frames.append(tactiles)
 		self._features_frames.append(features)
 		return self._transform_observation(time_step)
 
@@ -394,11 +394,10 @@ class ExtendedTimeStepWrapper(dm_env.Environment):
 		return getattr(self._env, name)
 
 
-def make(name, tactile_out_dir, tactile_model_type, host_address, camera_num, height, width, tactile_dim, frame_stack, action_repeat, action_type):
+# def make(name, tactile_out_dir, tactile_model_type, host_address, camera_num, height, width, tactile_dim, frame_stack, action_repeat, action_type):
+def make(name, host_address, camera_num, height, width, tactile_dim, frame_stack, action_repeat, action_type):
 	env = gym.make(
 		name,
-		tactile_out_dir = tactile_out_dir,
-		tactile_model_type = tactile_model_type,
 		host_address = host_address,
 		camera_num = camera_num,
 		height = height,
@@ -409,7 +408,7 @@ def make(name, tactile_out_dir, tactile_model_type, host_address, camera_num, he
 	
 	# # add wrappers
 	env = RGBArrayAsObservationWrapper(env, width=width, height=height)
-	env = TactileReprAsObservationWrapper(env, tactile_embedding_dim=tactile_dim)
+	# env = TactileReprAsObservationWrapper(env, tactile_embedding_dim=tactile_dim)
 	# feature_dim = 19 if action_type == 'fingertip' else 23
 	env = RobotFeaturesAsObservationWrapper(env)
 	env = ActionDTypeWrapper(env, np.float32)

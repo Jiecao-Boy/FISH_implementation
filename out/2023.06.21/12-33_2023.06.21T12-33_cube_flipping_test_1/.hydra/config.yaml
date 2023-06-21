@@ -1,0 +1,146 @@
+suite:
+  suite: dexterousgym
+  name: dexterous_gym
+  task_name: ${suite.task.task_name}
+  frame_stack: 1
+  action_repeat: 1
+  save_snapshot: true
+  discount: 0.99
+  hidden_dim: 4068
+  num_train_frames: 2010
+  num_seed_frames: 200
+  task_make_fn:
+    _target_: environments.make
+    name: ${suite.task_name}
+    host_address: 172.24.71.211
+    camera_num: ${camera_num}
+    height: 480
+    width: 480
+    tactile_dim: ???
+    frame_stack: ${suite.frame_stack}
+    action_repeat: ${suite.action_repeat}
+    action_type: not_joint
+  task:
+    task_name: CubeFlipping-v1
+agent:
+  _target_: tactile_learning.agents.FISHAgent
+  expert_demo_nums: ${expert_demo_nums}
+  expert_id: ${expert_id}
+  reward_matching_steps: ${reward_matching_steps}
+  features_repeat: ${features_repeat}
+  end_frames_repeat: ${end_frames_repeat}
+  exploration: ${exploration}
+  sum_experts: ${sum_experts}
+  scale_representations: ${scale_representations}
+  exponential_exploration: ${exponential_exploration}
+  exponential_offset_exploration: ${exponential_offset_exploration}
+  base_policy: ${base_policy}
+  match_from_both: ${match_from_both}
+  episode_frame_matches: ${episode_frame_matches}
+  expert_frame_matches: ${expert_frame_matches}
+  ssim_base_factor: ${ssim_base_factor}
+  mock_demo_nums: ${mock_demo_nums}
+  data_path: ${data_path}
+  image_out_dir: ${image_out_dir}
+  tactile_out_dir: ${tactile_out_dir}
+  tactile_model_type: ${tactile_model_type}
+  image_model_type: ${image_model_type}
+  reward_representations: ${reward_representations}
+  policy_representations: ${policy_representations}
+  experiment_name: ${experiment}
+  view_num: ${camera_num}
+  action_shape: ???
+  device: ${device}
+  lr: 0.0001
+  feature_dim: 512
+  hidden_dim: 64
+  critic_target_tau: 0.01
+  num_expl_steps: ${num_seed_frames}
+  update_every_steps: 2
+  stddev_schedule: 0.1
+  stddev_clip: 0.3
+  augment: true
+  rewards: ${rewards}
+  sinkhorn_rew_scale: 200
+  update_target_every: 100000
+  auto_rew_scale: true
+  auto_rew_scale_factor: 10
+  bc_weight_type: qfilter
+  bc_weight_schedule: linear(1.0,0.1,20000)
+  arm_offset_scale_factor: 0.015
+  hand_offset_scale_factor: 0.07
+  offset_mask:
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+object: cube_flipping
+data_path: /home/irmak/Workspace/Holo-Bot/extracted_data/${object}
+image_out_dir: /scratch/yd2032/Desktop/fish_implementation/2023.06.14/15-23_temporal_ssl_bs_32_epochs_500_lr_1e-05_cube_flipping
+image_model_type: temporal
+tactile_out_dir: /home/irmak/Workspace/tactile-learning/tactile_learning/out/2023.01.28/12-32_tactile_byol_bs_512_tactile_play_data_alexnet_pretrained_duration_120
+tactile_model_type: byol
+reward_representations:
+- image
+policy_representations:
+- image
+- features
+seed: 42
+device: cuda
+num_train_frames: 10000
+num_seed_frames: 150
+eval_every_frames: 600
+num_eval_episodes: 20
+evaluate: false
+buffer_path: null
+expert_id: 0
+expert_demo_nums:
+- 15
+reward_matching_steps: 1
+match_from_both: true
+episode_frame_matches: 10
+expert_frame_matches: 1
+exponential_weight_init: false
+end_frames_repeat: 1
+sum_experts: false
+scale_representations: false
+exponential_exploration: false
+exponential_offset_exploration: false
+exploration: ou_noise
+base_policy: openloop
+rewards: sinkhorn_cosine
+ssim_base_factor: 0.7
+mock_env: false
+mock_demo_nums:
+- 10
+- 12
+- 13
+- 15
+- 2
+- 7
+camera_num: 0
+bc_regularize: false
+features_repeat: 5
+replay_buffer_size: 150000
+replay_buffer_num_workers: 2
+nstep: 3
+batch_size: 256
+save_eval_video: true
+save_train_video: true
+save_train_cost_matrices: true
+load_snapshot: false
+snapshot_weight: /home/irmak/Workspace/tactile-learning/weights/corl_trainings/plier_picking/snapshot_plier_picking_gen_0_1.pt
+log: true
+experiment: ${now:%Y.%m.%d}T${now:%H-%M}_${object}_test_1

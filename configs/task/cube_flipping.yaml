@@ -1,0 +1,9 @@
+image_out_dir: /scratch/yd2032/Desktop/fish_implementation/2023.06.14/15-23_temporal_ssl_bs_32_epochs_500_lr_1e-05_cube_flipping
+image_model_type: temporal 
+
+vinn_image_out_dir: /home/irmak/Workspace/tactile-learning/tactile_learning/out/2023.05.06/10-50_image_byol_bs_32_epochs_500_lr_1e-05_bowl_picking_after_rss
+vinn_image_model_type: byol
+
+data_path: /home/irmak/Workspace/Holo-Bot/extracted_data/cube_flipping
+
+name: bowl_unstacking

@@ -19,7 +19,7 @@ from PIL import Image
 
 # from tactile_learning.learners import init_learner
 from datasets import *
-from tactile_learning.environments import MockEnv
+from environments import MockEnv
 from model import *
 from utils import *
 
@@ -287,7 +287,7 @@ class Workspace:
                     action, base_action, is_episode_done, metrics = self.agent.act(
                         obs = dict(
                             image_obs = torch.FloatTensor(time_step.observation['pixels']),
-                            tactile_repr = torch.FloatTensor(time_step.observation['tactile']),
+                            # tactile_repr = torch.FloatTensor(time_step.observation['tactile']),
                             features = torch.FloatTensor(time_step.observation['features'])
                         ),
                         global_step = self.global_step, 
@@ -347,11 +347,13 @@ class Workspace:
         self.train_video_recorder.init(time_step.observation['pixels'])
         metrics = dict() 
         is_episode_done = False
+
+        ## NOTE: For every step
         while train_until_step(self.global_step): # We're going to behave as if we act and the observations and the representations are coming from the mock_demo but all the rest should be the same
             
             # At the end of an episode actions:
             ##NOTE: At end of an episode:
-            ##      update reward, add timestep
+            ##      update ot_reward, add timestep
             ##      clear episode step and episode reward
             ##NOTE: agent involved: OT_rewarder
             if time_step.last() or is_episode_done:
@@ -459,11 +461,14 @@ class Workspace:
 
             print('STEP: {}'.format(self.global_step))
             print('---------')
+            
 
+            
+            ## NOTE: 
             # Training - updating the agents 
             if not seed_until_step(self.global_step):
                 metrics = self.agent.update(
-                    replay_iter = self.replay_iter,
+                    replay_iter = self._replay_iter,
                     step = self.global_step,
                     bc_regularize = self.cfg.bc_regularize,
                     expert_replay_iter = None, # These could be used in the future

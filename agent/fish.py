@@ -90,7 +90,10 @@ class FISHAgent:
         self.ssim_base_factor = ssim_base_factor
         self.base_policy = base_policy
         self.exploration = exploration
-        
+
+        ## NOTE: Try to set the sampler first, in this way have to set the expert_demo_nums(demo_lst) carefully
+        self.demo_img_joint = data_sampler(self.data_path, view_num, expert_demo_nums)
+
         if self.base_policy == 'vinn_openloop':
             self.first_frame_encoder = resnet18(pretrained=True, out_dim=512) # NOTE: Set this differently
 
@@ -194,10 +197,6 @@ class FISHAgent:
 
         self.image_normalize = T.Normalize(VISION_IMAGE_MEANS, VISION_IMAGE_STDS)
 
-
-
-
-    ##NOTE: May need to change this!!!
     def _set_expert_demos(self): # Will stack the end frames back to back
         # We'll stack the tactile repr and the image observations
         self.expert_demos = []
@@ -205,23 +204,31 @@ class FISHAgent:
         tactile_reprs = []
         actions = []
         old_demo_id = -1
-        for step_id in range(len(self.data['image']['indices'])): 
-            # Set observations
-            demo_id, tactile_id = self.data['tactile']['indices'][step_id]
-            if (demo_id != old_demo_id and step_id > 0) or (step_id == len(self.data['image']['indices'])-1):
+        # for step_id in range(len(self.data['image']['indices'])): 
+        for step_id in range(len(self.demo_img_joint)):
+            # Set observations+
+            # demo_id, tactile_id = self.data['tactile']['indices'][step_id]
+            demo_id, image_id, allegro_action_id = self.demo_img_joint[step_id]
+            if (demo_id != old_demo_id and step_id > 0) or (step_id == len(self.demo_img_joint)-1):
+                ## NOTE: This means we are having a new expert demo (with multiple expert demos)
+                ##       Bellow seems to be irrelavent with the sampler: as long as image_obs are fine 
                 
                 if self.end_frames_repeat > 1:
                     # Stack the frame previous to the end - the end frame is not good - the last frame is the first frame...
                     frame_id_to_stack= -1 # Get the -2nd frame to stack - NOTE: This is a hack for the dataset - the end frame could be noisy sometimes and the last frame shouldn't be added!
-                    image_to_append, tactile_to_append, action_to_append = image_obs[frame_id_to_stack], tactile_reprs[frame_id_to_stack], actions[frame_id_to_stack]                
+                    # image_to_append, tactile_to_append, action_to_append = image_obs[frame_id_to_stack], tactile_reprs[frame_id_to_stack], actions[frame_id_to_stack]
+                    image_to_append, action_to_append = image_obs[frame_id_to_stack], actions[frame_id_to_stack]                
                     image_obs = image_obs[:frame_id_to_stack]
-                    tactile_reprs = tactile_reprs[:frame_id_to_stack]
+                    # tactile_reprs = tactile_reprs[:frame_id_to_stack]
                     actions = actions[:frame_id_to_stack]
                     for i in range(self.end_frames_repeat):
+                        ## NOTE: add end_frames_repeat number of last frames
+                        ##       Repeat end frames, why are we doing this?
                         image_obs.append(image_to_append)
-                        tactile_reprs.append(tactile_to_append)
+                        # tactile_reprs.append(tactile_to_append)
                         actions.append(action_to_append)
                 
+                ## NOTE: add the images_obs only at the end of each expert demo
                 self.expert_demos.append(dict(
                     image_obs = torch.stack(image_obs, 0), # NOTE: I don't think there is a problem here 
                     tactile_repr = torch.stack(tactile_reprs, 0),
@@ -231,10 +238,11 @@ class FISHAgent:
                 tactile_reprs = []
                 actions = []
 
-            tactile_value = self.data['tactile']['values'][demo_id][tactile_id]
-            tactile_repr = self.tactile_repr.get(tactile_value, detach=False)
+            # tactile_value = self.data['tactile']['values'][demo_id][tactile_id]
+            # tactile_repr = self.tactile_repr.get(tactile_value, detach=False)
 
-            _, image_id = self.data['image']['indices'][step_id]
+            # Set images
+            # _, image_id = self.data['image']['indices'][step_id]
             image = load_dataset_image(
                 data_path = self.data_path, 
                 demo_id = demo_id, 
@@ -244,21 +252,21 @@ class FISHAgent:
             )
 
             # Set actions
-            _, allegro_action_id = self.data['allegro_actions']['indices'][step_id]
+            # _, allegro_action_id = self.data['allegro_actions']['indices'][step_id]
             allegro_joint_action = self.data['allegro_actions']['values'][demo_id][allegro_action_id]
             if self.action_shape == 19:
                 allegro_action = self.kdl_solver.get_fingertip_coords(allegro_joint_action)
             else:
                 allegro_action = allegro_joint_action 
 
-            # Set kinova action 
-            _, kinova_id = self.data['kinova']['indices'][step_id]
-            kinova_action = self.data['kinova']['values'][demo_id][kinova_id]
-            demo_action = np.concatenate([allegro_action, kinova_action], axis=-1)
+            # # Set kinova action 
+            # _, kinova_id = self.data['kinova']['indices'][step_id]
+            # kinova_action = self.data['kinova']['values'][demo_id][kinova_id]
+            # demo_action = np.concatenate([allegro_action, kinova_action], axis=-1)
 
 
             image_obs.append(image)
-            tactile_reprs.append(tactile_repr)
+            # tactile_reprs.append(tactile_repr)
             actions.append(demo_action)
 
             
@@ -270,7 +278,6 @@ class FISHAgent:
             self._get_first_frame_exp_representations()
 
     
-
 
 
     def _get_first_frame_exp_representations(self): # This will be used for VINN
@@ -292,9 +299,10 @@ class FISHAgent:
     def _check_limits(self, offset_action):
         # limits = [-0.1, 0.1]
         hand_limits = [-self.hand_offset_scale_factor-0.2, self.hand_offset_scale_factor+0.2] 
-        arm_limits = [-self.arm_offset_scale_factor-0.02, self.arm_offset_scale_factor+0.02]
-        offset_action[:,:-7] = torch.clamp(offset_action[:,:-7], min=hand_limits[0], max=hand_limits[1])
-        offset_action[:,-7:] = torch.clamp(offset_action[:,-7:], min=arm_limits[0], max=arm_limits[1])
+        # arm_limits = [-self.arm_offset_scale_factor-0.02, self.arm_offset_scale_factor+0.02]
+        # offset_action[:,:-7] = torch.clamp(offset_action[:,:-7], min=hand_limits[0], max=hand_limits[1])
+        # offset_action[:,-7:] = torch.clamp(offset_action[:,-7:], min=arm_limits[0], max=arm_limits[1])
+        offset_action[:,:] = torch.clamp(offset_action[:,:], min=hand_limits[0], max=hand_limits[1])
         return offset_action
 
     def _get_closest_expert_id(self, obs):
@@ -357,8 +365,8 @@ class FISHAgent:
         action = self.expert_demos[self.expert_id]['actions'][episode_step]
 
         return torch.FloatTensor(action).to(self.device).unsqueeze(0), is_done
-
-
+    
+    ## NOTE: base_action + offset_action
     def act(self, obs, global_step, episode_step, eval_mode, metrics=None):
         with torch.no_grad():
             base_action, is_done = self.base_act(obs, episode_step)
@@ -409,24 +417,26 @@ class FISHAgent:
         is_explore = global_step < self.num_expl_steps or (self.exponential_exploration and rand_num < epsilon)
 
         if is_explore and self.exponential_offset_exploration:  # TODO: Do the OU Noise
-            offset_action[:,:-7] *= self.hand_offset_scale_factor / ((episode_step+1)/2) 
-            offset_action[:,-7:] *= self.arm_offset_scale_factor / ((episode_step+1)/2)
+            # offset_action[:,:-7] *= self.hand_offset_scale_factor / ((episode_step+1)/2) 
+            # offset_action[:,-7:] *= self.arm_offset_scale_factor / ((episode_step+1)/2)
+            offset_action *= self.arm_offset_scale_factor / ((episode_step+1)/2)
             if episode_step > 0:
                 offset_action += self.last_offset
             self.last_offset = offset_action
         else:
-            offset_action[:,:-7] *= self.hand_offset_scale_factor
-            offset_action[:,-7:] *= self.arm_offset_scale_factor
+            # offset_action[:,:-7] *= self.hand_offset_scale_factor
+            # offset_action[:,-7:] *= self.arm_offset_scale_factor
+            offset_action *= self.hand_offset_scale_factor
 
         # Check if the offset action is higher than the limits
         offset_action = self._check_limits(offset_action)
 
         print('HAND OFFSET ACTION: {}'.format(
-            offset_action[:,:-7]
+            offset_action[:,:]
         ))
-        print('ARM OFFSET ACTION: {}'.format(
-            offset_action[:,-7:]
-        ))
+        # print('ARM OFFSET ACTION: {}'.format(
+        #     offset_action[:,-7:]
+        # ))
 
         action = base_action + offset_action
 
@@ -483,6 +493,9 @@ class FISHAgent:
 
         return demo_action, np.zeros(self.action_shape) # Base action will be 0s only for now
 
+
+
+    ## NOTE: update related functions 
     def update_critic(self, obs, action, base_next_action, reward, discount, next_obs, step):
         metrics = dict()
 
@@ -491,8 +504,9 @@ class FISHAgent:
             dist = self.actor(next_obs, base_next_action, stddev)
 
             offset_action = dist.sample(clip=self.stddev_clip)
-            offset_action[:,:-7] *= self.hand_offset_scale_factor
-            offset_action[:,-7:] *= self.arm_offset_scale_factor 
+            # offset_action[:,:-7] *= self.hand_offset_scale_factor
+            # offset_action[:,-7:] *= self.arm_offset_scale_factor 
+            offset_action[:] *= self.hand_offset_scale_factor
             next_action = base_next_action + offset_action
 
             target_Q1, target_Q2 = self.critic_target(next_obs, next_action)
@@ -526,8 +540,9 @@ class FISHAgent:
         log_prob = dist.log_prob(action_offset).sum(-1, keepdim=True)
 
         # compute action
-        action_offset[:-7] *= self.hand_offset_scale_factor
-        action_offset[-7:] *= self.arm_offset_scale_factor 
+        # action_offset[:-7] *= self.hand_offset_scale_factor
+        # action_offset[-7:] *= self.arm_offset_scale_factor 
+        action_offset[:] *= self.hand_offset_scale_factor
         action = base_action + action_offset 
         Q1, Q2 = self.critic(obs, action)
         Q = torch.min(Q1, Q2)
@@ -557,8 +572,9 @@ class FISHAgent:
             stddev = 0.1
             dist_expert = self.actor(obs_expert, base_action_expert, stddev)
             action_expert_offset = dist_expert.sample(clip=self.stddev_clip)
-            action_expert_offset[:-7] *= self.hand_offset_scale_factor
-            action_expert_offset[-7:] *= self.arm_offset_scale_factor 
+            # action_expert_offset[:-7] *= self.hand_offset_scale_factor
+            # action_expert_offset[-7:] *= self.arm_offset_scale_factor 
+            action_expert_offset[:] *= self.hand_offset_scale_factor
             # action_expert_offset = dist_expert.sample(clip=self.stddev_clip) * self.offset_scale_factor
 
             true_offset = torch.zeros(action_expert_offset.shape).to(self.device)
@@ -585,8 +601,9 @@ class FISHAgent:
             
         return metrics
 
-    def _get_policy_reprs_from_obs(self, image_obs, tactile_repr, features):
-         # Get the representations
+    # def _get_policy_reprs_from_obs(self, image_obs, tactile_repr, features:
+    def _get_policy_reprs_from_obs(self, image_obs, features): 
+         # Get the representations)
         reprs = []
         if 'image' in self.policy_representations:
             # Current representations
@@ -601,11 +618,11 @@ class FISHAgent:
             print('image_reprs.mean(): {}'.format(image_reprs.mean()))
             reprs.append(image_reprs)
 
-        if 'tactile' in self.policy_representations:
-            # tactile_repr *= 50 # In order to scale the image and the tactile representations
-            print('tactile_repr.mean(): {}'.format(tactile_repr.mean()))
-            tactile_reprs = tactile_repr.to(self.device) # This will give all the representations of one batch
-            reprs.append(tactile_reprs)
+        # if 'tactile' in self.policy_representations:
+        #     # tactile_repr *= 50 # In order to scale the image and the tactile representations
+        #     print('tactile_repr.mean(): {}'.format(tactile_repr.mean()))
+        #     tactile_reprs = tactile_repr.to(self.device) # This will give all the representations of one batch
+        #     reprs.append(tactile_reprs)
 
         if 'features' in self.policy_representations:
             repeated_features = features.repeat(1, self.features_repeat)
@@ -621,7 +638,7 @@ class FISHAgent:
             return metrics
 
         batch = next(replay_iter)
-        image_obs, tactile_repr, features, action, base_action, reward, discount, next_image_obs, next_tactile_repr, next_features, base_next_action = to_torch(
+        image_obs, features, action, base_action, reward, discount, next_image_obs, next_features, base_next_action = to_torch(
             batch, self.device)
         
         # Multiply action with the offset mask just incase if the buffer was not saved that way
@@ -629,17 +646,17 @@ class FISHAgent:
         offset_action = action - base_action
         offset_action *= self.offset_mask 
         action = base_action + offset_action
-        print('UPDATE - image_obs.shape: {}'.format(image_obs.shape))
+        # print('UPDATE - image_obs.shape: {}'.format(image_obs.shape))
 
         # Get the representations
         obs = self._get_policy_reprs_from_obs(
             image_obs = image_obs, # These are stacked PIL images?
-            tactile_repr = tactile_repr,
+            # tactile_repr = tactile_repr,
             features = features,
         )
         next_obs = self._get_policy_reprs_from_obs(
             image_obs = next_image_obs, 
-            tactile_repr = next_tactile_repr,
+            # tactile_repr = next_tactile_repr,
             features = next_features
         )
 
@@ -666,6 +683,7 @@ class FISHAgent:
                                     self.critic_target_tau)
 
         return metrics
+
 
 
     ##NOTE: rewarder
