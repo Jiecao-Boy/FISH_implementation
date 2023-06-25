@@ -22,6 +22,7 @@ from torchvision import transforms as T
 from model import *
 from utils import *
 from model.utils import *
+from datasets import *
 # from tactile_learning.tactile_data import *
 
 from holobot.robot.allegro.allegro_kdl import AllegroKDL
@@ -105,7 +106,7 @@ class FISHAgent:
         image_cfg, self.image_encoder, self.image_transform  = init_encoder_info(self.device, image_out_dir, 'image', view_num=view_num, model_type=image_model_type)
         self._set_image_transform()
 
-        print('image_cfg.encoder: {}'.format(image_cfg.encoder))
+        # print('image_cfg.encoder: {}'.format(image_cfg.encoder))
         # image_repr_dim = image_cfg.encoder.image_encoder.out_dim if image_model_type == 'bc' else image_cfg.encoder.out_dim # TODO: Merge these in a better hydra config
         image_repr_dim = 512
 
@@ -140,13 +141,17 @@ class FISHAgent:
         self.action_shape = action_shape
         self._set_expert_demos()
 
+
         repr_dim = 0
         # if 'tactile' in policy_representations:
         #     repr_dim += tactile_repr_dim
         if 'image' in policy_representations:
             repr_dim += image_repr_dim
         if 'features' in policy_representations:
-            repr_dim += 23 * features_repeat
+            # repr_dim += 23 * features_repeat
+            repr_dim += 16* features_repeat 
+        #NOTE: do I have to change this??
+        
 
         self.offset_mask = torch.IntTensor(offset_mask).to(self.device)
         self.actor = Actor(repr_dim, action_shape, feature_dim,
@@ -157,13 +162,16 @@ class FISHAgent:
         self.critic_target = Critic(repr_dim, action_shape,
                                     feature_dim, hidden_dim).to(device)
         self.critic_target.load_state_dict(self.critic.state_dict())
+
             
         self.actor_opt = torch.optim.Adam(self.actor.parameters(), lr=lr)
         self.critic_opt = torch.optim.Adam(self.critic.parameters(), lr=lr)
 
+
         # Data augmentation
         self.image_aug = RandomShiftsAug(pad=4) # This is augmentation for the image
         self.image_normalize = T.Normalize(VISION_IMAGE_MEANS, VISION_IMAGE_STDS)
+
 
         self.train()
         self.critic_target.train()
@@ -231,7 +239,7 @@ class FISHAgent:
                 ## NOTE: add the images_obs only at the end of each expert demo
                 self.expert_demos.append(dict(
                     image_obs = torch.stack(image_obs, 0), # NOTE: I don't think there is a problem here 
-                    tactile_repr = torch.stack(tactile_reprs, 0),
+                    # tactile_repr = torch.stack(tactile_reprs, 0),
                     actions = np.stack(actions, 0)
                 ))
                 image_obs = [] 
@@ -267,7 +275,8 @@ class FISHAgent:
 
             image_obs.append(image)
             # tactile_reprs.append(tactile_repr)
-            actions.append(demo_action)
+            # actions.append(demo_action)
+            actions.append(allegro_action)
 
             
 
@@ -276,8 +285,6 @@ class FISHAgent:
         if 'vinn' in self.base_policy:
             self.first_frame_img_encoder = resnet18(pretrained=True, out_dim=512).to(self.device).eval()
             self._get_first_frame_exp_representations()
-
-    
 
 
     def _get_first_frame_exp_representations(self): # This will be used for VINN
@@ -838,7 +845,7 @@ class FISHAgent:
         plt.title(file_name)
 
         ##NOTE: if used, this need to be changed
-        dump_dir = Path('/home/irmak/Workspace/tactile-learning/online_training_outs/costs') / self.experiment_name
+        dump_dir = Path('/scratch/yd2032/Desktop/fish_implementation/online_training_outs/costs') / self.experiment_name
         # dump_dir = os.path.join('/home/irmak/Workspace/tactile-learning/train_video/costs/{}')
         os.makedirs(dump_dir, exist_ok=True)
         dump_file = os.path.join(dump_dir, file_name)

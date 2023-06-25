@@ -57,7 +57,8 @@ class RGBArrayAsObservationWrapper(dm_env.Environment):
 		return obs
 
 	def step(self, action):
-		obs, reward, done, _, info = self._env.step(action) # It's returning truncated
+		# obs, reward, done, _, info = self._env.step(action) # It's returning truncated
+		obs, reward, done, _, info = self._env.step(action)
 		# obs = {}
 		obs['pixels'] = obs['pixels'].astype(np.uint8)
 		# We will be receiving 
@@ -405,7 +406,6 @@ def make(name, host_address, camera_num, height, width, tactile_dim, frame_stack
 		action_type = action_type
 	)
 	# env.seed(seed)
-	
 	# # add wrappers
 	env = RGBArrayAsObservationWrapper(env, width=width, height=height)
 	# env = TactileReprAsObservationWrapper(env, tactile_embedding_dim=tactile_dim)

@@ -7,4 +7,5 @@ from .video_recorder import *
 from .rewarder import *
 from .utils import *
 from .rl_exploration import *
-
+from .timer import *
+from .distributions import *

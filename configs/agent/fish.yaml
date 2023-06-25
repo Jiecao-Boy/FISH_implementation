@@ -1,5 +1,5 @@
 # @package agent
-_target_: tactile_learning.agents.FISHAgent
+_target_: fish.agent.fish.FISHAgent
 expert_demo_nums: ${expert_demo_nums} # Demo to get the base action from
 expert_id: ${expert_id}
 reward_matching_steps: ${reward_matching_steps}

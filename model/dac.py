@@ -3,6 +3,7 @@ import torch.nn as nn
 
 # from tactile_learning.utils import *
 from .utils import *
+from fish.utils import *
 
 # Deep Actor Critic models
 
@@ -22,7 +23,6 @@ class Actor(nn.Module):
 	def __init__(self, repr_dim, action_shape, feature_dim, hidden_dim, offset_mask):
 		super().__init__()
 
-
 		self.policy = nn.Sequential(nn.Linear(repr_dim + action_shape[0]*100, hidden_dim), # TODO: Why multiply with 100??
 									nn.ReLU(inplace=True),
 									nn.Linear(hidden_dim, hidden_dim),
@@ -30,7 +30,7 @@ class Actor(nn.Module):
 									nn.Linear(hidden_dim, action_shape[0]))
 		self.offset_mask = torch.tensor(offset_mask).float().to(torch.device('cuda')) # NOTE: This is used to set the exploration
 
-		self.apply(weight_init)
+		# self.apply(weight_init)
 
 	def forward(self, obs, action, std):
 
@@ -59,7 +59,7 @@ class Critic(nn.Module):
 			nn.ReLU(inplace=True), nn.Linear(hidden_dim, hidden_dim),
 			nn.ReLU(inplace=True), nn.Linear(hidden_dim, 1))
 
-		self.apply(weight_init)
+		# self.apply(weight_init)
 
 	def forward(self, obs, action):
 		h_action = torch.cat([obs, action], dim=-1)

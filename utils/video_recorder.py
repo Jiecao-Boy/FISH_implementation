@@ -68,4 +68,5 @@ class TrainVideoRecorder:
     def save(self, file_name):
         if self.enabled:
             path = self.save_dir / file_name
-            imageio.mimsave(str(path), self.frames, fps=self.fps)
+            # imageio.mimsave(str(path), self.frames, fps=self.fps)
+            imageio.mimsave(str(path), self.frames)
